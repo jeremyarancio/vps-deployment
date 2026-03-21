@@ -1,23 +1,17 @@
 from abc import ABC, abstractmethod
-from uuid import UUID
 
-from vps_deployment.domain.entities.note import Note
+from app.domain.note import Note, NoteId
 
 
-class NoteRepository(ABC):
+class INoteRepository(ABC):
+    @abstractmethod
+    def save(self, note: Note) -> None: ...
 
     @abstractmethod
-    def save(self, note: Note) -> Note:
-        ...
+    def get_by_id(self, note_id: NoteId) -> Note | None: ...
 
     @abstractmethod
-    def get_by_id(self, note_id: UUID) -> Note | None:
-        ...
+    def list_all(self) -> list[Note]: ...
 
     @abstractmethod
-    def list_all(self) -> list[Note]:
-        ...
-
-    @abstractmethod
-    def delete(self, note_id: UUID) -> bool:
-        ...
+    def delete(self, note_id: NoteId) -> None: ...

@@ -1,26 +1,25 @@
-from uuid import UUID
-
-from vps_deployment.domain.entities.note import Note
-from vps_deployment.domain.repositories.note_repository import NoteRepository
+from app.application.ports.notes import INoteRepository
+from app.domain.note import Note, NoteId
 
 
-class InMemoryNoteRepository(NoteRepository):
+class InMemoryNoteRepository(INoteRepository):
+    _notes: dict[NoteId, Note]
 
-    def __init__(self) -> None:
-        self._store: dict[UUID, Note] = {}
+    @classmethod
+    def init(cls) -> None:
+        cls._notes = {}
 
-    def save(self, note: Note) -> Note:
-        self._store[note.id] = note
-        return note
+    def save(self, note: Note) -> None:
+        self._notes[note.id_] = note
 
-    def get_by_id(self, note_id: UUID) -> Note | None:
-        return self._store.get(note_id)
+    def get_by_id(self, note_id: NoteId) -> Note | None:
+        return self._notes.get(note_id)
 
     def list_all(self) -> list[Note]:
-        return list(self._store.values())
+        return list(self._notes.values())
 
-    def delete(self, note_id: UUID) -> bool:
-        if note_id in self._store:
-            del self._store[note_id]
-            return True
-        return False
+    def delete(self, note_id: NoteId) -> None:
+        try:
+            self._notes.pop(note_id)
+        except KeyError:
+            raise
