@@ -1,0 +1,20 @@
+services:
+  traefik:
+    restart: unless-stopped
+
+  api:
+    deploy:
+      replicas: 3
+    labels:
+      # Rate limiting: 50 req/s average, allows bursts up to 100
+      - "traefik.http.middlewares.api-ratelimit.ratelimit.average=50"
+      - "traefik.http.middlewares.api-ratelimit.ratelimit.burst=100"
+      # Prevents clickjacking by blocking iframe embedding
+      - "traefik.http.middlewares.api-headers.headers.frameDeny=true"
+      # Tells older browsers to block reflected XSS attempts
+      - "traefik.http.middlewares.api-headers.headers.browserXssFilter=true"
+      # Prevents browsers from MIME-sniffing a response away from the declared content type
+      - "traefik.http.middlewares.api-headers.headers.contentTypeNosniff=true"
+      # Apply middlewares
+      - "traefik.http.routers.api.middlewares=api-ratelimit,api-headers"
+    restart: unless-stopped

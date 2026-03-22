@@ -23,7 +23,7 @@ def create_note(
     return Response(content="Note created.", status_code=201)
 
 
-@router.get("", response_model=list[NoteResponse])
+@router.get("")
 def list_notes(
     repository: Annotated[INoteRepository, Depends(get_note_repository)],
 ) -> list[NoteResponse]:
