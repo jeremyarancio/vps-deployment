@@ -3,6 +3,7 @@ services:
     restart: unless-stopped
 
   api:
+    image: ghcr.io/jeremyarancio/vps-deployment-api:latest
     deploy:
       replicas: 3
     labels:
@@ -18,3 +19,18 @@ services:
       # Apply middlewares
       - "traefik.http.routers.api.middlewares=api-ratelimit,api-headers"
     restart: unless-stopped
+
+  watchtower:
+    image: containrrr/watchtower
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command:
+      - --label-enable
+      - --rolling-restart
+      - --interval
+      - "120"
+    environment:
+      - REPO_USER=${GH_USER}
+      - REPO_PASS=${GH_PASSWORD}
+      - DOCKER_API_VERSION=1.53 #Bug with watchtower (https://github.com/containrrr/watchtower/issues/2126)
